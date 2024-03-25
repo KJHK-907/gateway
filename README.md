@@ -16,3 +16,23 @@ For the design, I'm imagining a widget style dashboard kind of like https://bent
 
 If there's any DB needed, you can use vercel pg or vercel kv
 Use Next.js 13 and take advantage of SSR whenever possible
+Add unit test/component test wherever necessary
+
+
+Admin side:
+- integrate with google calendar
+- program scheduling - history of programs (changes every semester) - update json every semester
+    - Name of program
+    - DJ
+    - description
+    - time
+    - day
+
+- history JSON current sem JSON or each sem JSON
+- route to fetch programs for the semester
+
+- daily announcements 
+- upcoming sports games
+- Album of the week
+- everything can be done using calendar API
+- Genre Codes (static table)

@@ -1,38 +1,25 @@
-# dashboard
-- Weather Information 
-- Song Facts for currently playing song (https://kjhk.org/api/now-playing.php)
-- Form for manual music logging (I will send you API route when you get here)
-- Integration with Google Calendar to display upcoming football games (no calendar atm)
-- Upcoming meeting feed (no calendar atm)
-- Dynamic announcements (need a way for manager to update this) 
+Idea:
+    - TCP Server listens to metadata sent out from Zetta RCS
+        - Supported metadata:
+            - New Media Playing
 
-There are a few other features but this is the foundation.
+    - TCP Server sends out metadata to all connected clients via WebSocket
 
-There should be basic authentication (user/pass). There should be two accounts (DJ/Admin) 
+    - Connection:
+        - Client (App) connects to WebSocket Server and sends message to subscribe to metadata via Opcodes
+        - WebSocket Server sends back message to confirm subscription and sends out metadata including heartbeat interval
+        - Client (App) receives metadata from WebSocket Server
+        - Client (App) sends heartbeat to WebSocket Server to keep connection alive
+        - WebSocket Server sends heartbeat opcode to client occasionally to keep connection alive
+        - Client (App) disconnects from WebSocket Server
 
-Admin would just dynamically render a few more things like the form to update announcements etc.
+    - Opcodes:
+        - Heartbeat
+        - HeartbeatAck
 
-For the design, I'm imagining a widget style dashboard kind of like https://bento.me/ each "feature" has it's own small dedicated widget. This will make it so we don't have to follow a traditional dashboard layout and if we want to add a new feature, it's as easy as adding a widget/block
+    =====
 
-If there's any DB needed, you can use vercel pg or vercel kv
-Use Next.js 13 and take advantage of SSR whenever possible
-Add unit test/component test wherever necessary
-
-
-Admin side:
-- integrate with google calendar
-- program scheduling - history of programs (changes every semester) - update json every semester
-    - Name of program
-    - DJ
-    - description
-    - time
-    - day
-
-- history JSON current sem JSON or each sem JSON
-- route to fetch programs for the semester
-
-- daily announcements 
-- upcoming sports games
-- Album of the week
-- everything can be done using calendar API
-- Genre Codes (static table)
+    - Blockers:
+        - How can we send out initial metadata to client when they first connect?
+            - Since the TCP Server only sends out data when it recives it
+            - We will need to store current metadata in memory and send it out to client when they first connect

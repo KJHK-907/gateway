@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ZettaLite Version="0.0.0">
+<LogEventCollection>
+<LogEvent 
+    Type="SONG" 
+    ScheduledTime="2024-07-09T21:00:35Z" 
+    StartTime="2024-07-09T21:00:35Z" 
+    StartTimeLocal="7/9/2024 4:00:35 PM" 
+    Chain="INVALID" 
+    Status="CURRENT" 
+    Duration="04:14" 
+    EditCode="SEQUENCER_INSERT_FILL" 
+    LastStarted="true" 
+    ZettaId="1370785"
+    >
+    <Asset 
+        Type="SONG" 
+        AssetTypeName="Song" 
+        Title="Pumpkin" 
+        Comment="None" 
+        ZettaId="135023" 
+        ThirdPartyId="Pumpkin" 
+        File="\\KUMUPRDZTAAP.home.ku.edu\Zetta\Audio\141\141096~Pumpkin.mp3" 
+        TotalLength="257.92" 
+        Artist1="Been Stellar" 
+        Album1="Scream from New York, NY" 
+        Category="ROT" 
+        TrimIn="0.21" 
+        TrimOut="255.0439" />
+</LogEvent>
+</LogEventCollection>
+</ZettaLite>

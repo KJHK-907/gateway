@@ -23,11 +23,15 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	for {
-		_, msg, err := conn.ReadMessage()
+		// Send metadata to client
+		currentMetadata := <-MetadataChannel
+		err = conn.WriteJSON(currentMetadata)
+		println("Sent metadata to client:")
+		fmt.Printf("%+v\n", currentMetadata)
+		println("--------------------------")
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println(string(msg))
 	}
 }

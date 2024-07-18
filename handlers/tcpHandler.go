@@ -38,7 +38,10 @@ func handleConnection(conn net.Conn) {
 				fmt.Println(err)
 				return
 			}
+			MetadataChannel <- currentMetadata
+			println("Received metadata from Zetta RCS:")
 			fmt.Printf("%+v\n", currentMetadata)
+			println("--------------------------")
 		}
 		// fmt.Println(string(buf))
 	}

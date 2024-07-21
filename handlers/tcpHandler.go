@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net"
+	"strings"
 
 	"gateway/services"
 )
@@ -25,24 +27,19 @@ func StartTCPServer() {
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
+	var buffer strings.Builder
 	for {
 		buf := make([]byte, 1024)
 		n, err := conn.Read(buf)
 		if err != nil {
-			fmt.Println(err)
-			return
+			log.Println(err)
+			continue
 		}
 		if n > 0 {
-			currentMetadata, err := services.ParseXml(buf[:n])
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			MetadataChannel <- currentMetadata
 			println("Received metadata from Zetta RCS:")
-			fmt.Printf("%+v\n", currentMetadata)
+			log.Println(string(buf[:n]))
 			println("--------------------------")
+			services.ProcessXml(buf[:n], &buffer)
 		}
-		// fmt.Println(string(buf))
 	}
 }

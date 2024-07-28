@@ -8,7 +8,13 @@ import (
 func main() {
 	go handlers.StartTCPServer()
 
-	http.HandleFunc("/ws", handlers.HandleWebSocket)
+	pool := handlers.NewPool()
+
+	go handlers.HandlePool(pool)
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		handlers.HandleWebSocket(pool, w, r)
+	})
 
 	http.ListenAndServe(":8080", nil)
 }

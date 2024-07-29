@@ -25,6 +25,8 @@ func HandlePool(pool *models.Pool) {
 			for _, client := range pool.Clients {
 				if err := client.Conn.WriteJSON(trackInfo); err != nil {
 					log.Println(err)
+					pool.Unregister <- client
+					client.Conn.Close()
 				}
 			}
 		}

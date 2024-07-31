@@ -2,6 +2,7 @@ package main
 
 import (
 	"gateway/handlers"
+	"gateway/services"
 	"net/http"
 )
 
@@ -10,6 +11,7 @@ func main() {
 
 	go handlers.StartTCPServer(pool)
 	go handlers.HandlePool(pool)
+	go services.CleanupOldEntries()
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HandleWebSocket(pool, w, r)

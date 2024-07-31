@@ -6,10 +6,9 @@ import (
 )
 
 func main() {
-	go handlers.StartTCPServer()
-
 	pool := handlers.NewPool()
 
+	go handlers.StartTCPServer(pool)
 	go handlers.HandlePool(pool)
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
 	"gateway/models"
 	"gateway/services"
@@ -33,14 +34,19 @@ func handleConnection(conn net.Conn, pool *models.Pool) {
 	var buffer strings.Builder
 	for {
 		buf := make([]byte, 1024)
+		conn.SetReadDeadline(time.Now().Add(10 * time.Minute)) // Set a timeout of 10 minutes
 		n, err := conn.Read(buf)
 		if err != nil {
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				log.Println("Read timeout, closing connection")
+				return
+			}
 			if err == io.EOF {
 				log.Println("Connection closed by Zetta RCS")
 				return
 			}
-			log.Println(err)
-			continue
+			log.Println("Read error:", err)
+			return
 		}
 		if n > 0 {
 			log.Println("Received metadata from Zetta RCS:")

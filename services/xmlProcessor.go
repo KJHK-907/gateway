@@ -35,8 +35,11 @@ func ProcessXml(data []byte, buffer *strings.Builder, pool *models.Pool) {
 			continue
 		}
 		trackInfo := GenerateTrackinfo(currentMetadata)
-		// Broadcast the track info to all connected clients
-
+		// Check if trackinfo is empty
+		if trackInfo == (models.Trackinfo{}) {
+			buffer.Reset()
+			continue
+		}
 		// Check if trackinfo is in the recentTrackInfo map
 		mu.Lock()
 		if _, ok := recentTrackInfo[trackInfo.Track]; ok {

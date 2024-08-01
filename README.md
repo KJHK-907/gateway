@@ -32,3 +32,12 @@ Program scheduling
         - day
     - history JSON current sem JSON or each sem JSON
     - route to fetch programs for the semester
+
+- Notes:
+    - If my websocket server would handle 10,000 clients then how do I decide what buffer size should the channels in the Pool struct be?
+    - gracefully shutdown the websocket server in case of interrupt signal timeout and context
+    - load testing with 10,000 clients
+    - clear old entries in the broadcast buffer when the buffer is full
+    - How do I send out metadata to the client when they first connect?
+    - Check for duplicate entries before sending out metadata in the broadcast buffer
+    - Check if it is a Link or a Song

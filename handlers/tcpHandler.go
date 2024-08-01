@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -14,17 +13,19 @@ import (
 func StartTCPServer(pool *models.Pool) {
 	listener, err := net.Listen("tcp", ":1234")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	defer listener.Close()
-	conn, err := listener.Accept()
-	println("Connected with Zetta RCS")
-	if err != nil {
-		fmt.Println(err)
-		return
+	for {
+		conn, err := listener.Accept()
+		log.Println("Connected with Zetta RCS")
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		go handleConnection(conn, pool)
 	}
-	go handleConnection(conn, pool)
 }
 
 func handleConnection(conn net.Conn, pool *models.Pool) {

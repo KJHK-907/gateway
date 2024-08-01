@@ -8,6 +8,11 @@ import (
 )
 
 func GenerateTrackinfo(currentMetadata models.ZettaLite) models.Trackinfo {
+
+	if len(currentMetadata.LogEventCollection.LogEvent.Asset) == 0 {
+		log.Println("Error: Asset slice is empty")
+		return models.Trackinfo{}
+	}
 	totalLength, err := strconv.ParseFloat(currentMetadata.LogEventCollection.LogEvent.Asset[0].TotalLength, 64)
 	if err != nil {
 		log.Printf("Error converting TotalLength to int: %v", err)

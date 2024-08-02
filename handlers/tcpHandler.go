@@ -20,11 +20,11 @@ func StartTCPServer(pool *models.Pool) {
 	defer listener.Close()
 	for {
 		conn, err := listener.Accept()
-		log.Println("Connected with Zetta RCS")
 		if err != nil {
-			log.Println(err)
+			log.Println("Error accepting connection:", err)
 			continue
 		}
+		log.Println("Connected with Zetta RCS")
 		go handleConnection(conn, pool)
 	}
 }
@@ -33,7 +33,7 @@ func handleConnection(conn net.Conn, pool *models.Pool) {
 	defer conn.Close()
 	var buffer strings.Builder
 	for {
-		buf := make([]byte, 1024)
+		buf := make([]byte, 4096)
 		conn.SetReadDeadline(time.Now().Add(10 * time.Minute)) // Set a timeout of 10 minutes
 		n, err := conn.Read(buf)
 		if err != nil {

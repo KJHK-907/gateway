@@ -40,14 +40,26 @@ func ProcessXml(data []byte, buffer *strings.Builder, pool *models.Pool) {
 			buffer.Reset()
 			continue
 		}
-		// Check if trackinfo is in the recentTrackInfo map
-		mu.Lock()
-		if _, ok := recentTrackInfo[trackInfo.Track]; ok {
-			mu.Unlock()
+
+		// Parse the TimestampUTC from trackInfo
+		const layout = time.RFC3339
+		timestampUTC, err := time.Parse(layout, trackInfo.TimestampUTC)
+		if err != nil {
+			log.Printf("Error parsing TimestampUTC: %v", err)
 			buffer.Reset()
 			continue
 		}
-		recentTrackInfo[trackInfo.Track] = time.Now()
+
+		// Check if trackinfo is in the recentTrackInfo map
+		mu.Lock()
+		if lastPlayed, ok := recentTrackInfo[trackInfo.Track]; ok {
+			if lastPlayed.Equal(timestampUTC) {
+				mu.Unlock()
+				buffer.Reset()
+				continue
+			}
+		}
+		recentTrackInfo[trackInfo.Track] = timestampUTC
 		mu.Unlock()
 
 		pool.Broadcast <- trackInfo

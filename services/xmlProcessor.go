@@ -64,7 +64,7 @@ func ProcessXml(data []byte, buffer *strings.Builder, pool *models.Pool) {
 		mu.Unlock()
 
 		pool.Broadcast <- trackInfo
-		log.Println("Received metadata from Zetta RCS:")
+		log.Println("Sending track info to clients:")
 		fmt.Printf("%+v\n", trackInfo)
 		println("--------------------------")
 
@@ -74,14 +74,15 @@ func ProcessXml(data []byte, buffer *strings.Builder, pool *models.Pool) {
 }
 
 func CleanupOldEntries(ctx context.Context) {
+	ticker := time.NewTicker(time.Hour) // Check every hour
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			log.Println("Cleanup cancelled")
 			return
-		default:
-			time.Sleep(time.Hour) // Run cleanup every hour
-
+		case <-ticker.C:
 			mu.Lock()
 			for track, timestamp := range recentTrackInfo {
 				if time.Since(timestamp) > time.Hour { // Clear entries older than 1 hour

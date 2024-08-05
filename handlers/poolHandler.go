@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"gateway/models"
 	"log"
 )
@@ -14,9 +15,12 @@ func NewPool() *models.Pool {
 	}
 }
 
-func HandlePool(pool *models.Pool) {
+func HandlePool(ctx context.Context, pool *models.Pool) {
 	for {
 		select {
+		case <-ctx.Done():
+			log.Println("Pool handling cancelled")
+			return
 		case client := <-pool.Register:
 			pool.Clients[client.ID] = client
 		case client := <-pool.Unregister:

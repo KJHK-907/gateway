@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -72,16 +73,22 @@ func ProcessXml(data []byte, buffer *strings.Builder, pool *models.Pool) {
 	}
 }
 
-func CleanupOldEntries() {
+func CleanupOldEntries(ctx context.Context) {
 	for {
-		time.Sleep(time.Hour) // Run cleanup every hour
+		select {
+		case <-ctx.Done():
+			log.Println("Cleanup cancelled")
+			return
+		default:
+			time.Sleep(time.Hour) // Run cleanup every hour
 
-		mu.Lock()
-		for track, timestamp := range recentTrackInfo {
-			if time.Since(timestamp) > time.Hour { // Clear entries older than 1 hour
-				delete(recentTrackInfo, track)
+			mu.Lock()
+			for track, timestamp := range recentTrackInfo {
+				if time.Since(timestamp) > time.Hour { // Clear entries older than 1 hour
+					delete(recentTrackInfo, track)
+				}
 			}
+			mu.Unlock()
 		}
-		mu.Unlock()
 	}
 }

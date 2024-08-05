@@ -34,10 +34,17 @@ Program scheduling
     - route to fetch programs for the semester
 
 - Notes:
-    - If my websocket server would handle 10,000 clients then how do I decide what buffer size should the channels in the Pool struct be?
-    - gracefully shutdown the websocket server in case of interrupt signal timeout and context
-    - load testing with 10,000 clients
-    - clear old entries in the broadcast buffer when the buffer is full
-    - How do I send out metadata to the client when they first connect?
-    - Check for duplicate entries before sending out metadata in the broadcast buffer
-    - Check if it is a Link or a Song
+    -(TODO) If my websocket server would handle 10,000 clients then how do I decide what buffer size should the channels in the Pool struct be?
+    -(TODO) load testing with 10,000 clients
+    -(TODO) clear old entries in the broadcast buffer when the buffer is full
+    -(TODO) Check if it is a Link or a Song
+    -(TODO) How do I send out metadata to the client when they first connect?
+    -(TODO) Test client connection by creating a client script
+    
+    -(DONE) Should the websocket server be a goroutine or a main routine
+    -(DONE) Check for duplicate entries in the recentTrackInfo map before sending out metadata in the broadcast buffer - time period is 10 minutes
+    -(DONE) clear old entries in the recentTrackInfo map when the map is full 
+    -(DONE) If Zetta did not send anything in the last 10 minutes then attempt reconnection
+    -(DONE) gracefully shutdown the websocket server in case of interrupt signal timeout and context
+
+    -(Note) Use caffeinate to prevent the system from going to sleep causing connection issues

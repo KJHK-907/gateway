@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 	"time"
 
 	"gateway/models"
@@ -20,19 +21,31 @@ func StartTCPServer(ctx context.Context, pool *models.Pool) {
 	}
 	defer listener.Close()
 
+	ctxListener := newContextListener(ctx, listener)
+	var connWg sync.WaitGroup
+
 	for {
 		select {
 		case <-ctx.Done():
 			log.Println("TCP server shutting down due to context cancellation")
+			connWg.Wait()
 			return
 		default:
-			conn, err := listener.Accept()
+			conn, err := ctxListener.Accept()
 			if err != nil {
+				if ctx.Err() != nil {
+					// The context has been canceled
+					return
+				}
 				log.Println("Error accepting connection:", err)
 				continue
 			}
 			log.Println("Connected with Zetta RCS")
-			go handleConnection(ctx, conn, pool)
+			connWg.Add(1)
+			go func() {
+				defer connWg.Done()
+				handleConnection(ctx, conn, pool)
+			}()
 		}
 	}
 }

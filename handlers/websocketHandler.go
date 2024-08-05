@@ -32,8 +32,4 @@ func HandleWebSocket(pool *models.Pool, w http.ResponseWriter, r *http.Request) 
 	}
 	pool.Register <- client
 
-	defer func() {
-		pool.Unregister <- client
-		client.Conn.Close()
-	}()
 }

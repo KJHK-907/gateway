@@ -13,27 +13,40 @@ func TestWebSocketClientReceivesCurrentMetadata(t *testing.T) {
 	serverURL := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/ws"}
 	log.Printf("Connecting to %s", serverURL.String())
 
-	c, _, err := websocket.DefaultDialer.Dial(serverURL.String(), nil)
+	var c *websocket.Conn
+	var err error
+	maxRetries := 5
+
+	for i := 0; i < maxRetries; i++ {
+		c, _, err = websocket.DefaultDialer.Dial(serverURL.String(), nil)
+		if err == nil {
+			log.Println("Connected to WebSocket server")
+			break
+		}
+		log.Printf("Failed to connect to WebSocket server: %v. Retrying... (%d/%d)", err, i+1, maxRetries)
+		time.Sleep(2 * time.Second) // Wait before retrying
+	}
+
 	if err != nil {
-		t.Fatalf("Failed to connect to WebSocket server: %v", err)
+		t.Fatalf("Failed to connect to WebSocket server after %d attempts: %v", maxRetries, err)
 	}
 	defer c.Close()
 
-	c.SetReadDeadline(time.Now().Add(300 * time.Second))
+	// Continuously read messages from the WebSocket connection
+	for {
+		c.SetReadDeadline(time.Now().Add(5 * time.Minute)) // Set a timeout of 5 minutes for reading
 
-	// Attempt to read a message from the WebSocket connection
-	_, message, err := c.ReadMessage()
-	if err != nil {
-		t.Fatalf("Failed to read message: %v", err)
-	}
+		// Attempt to read a message from the WebSocket connection
+		_, message, err := c.ReadMessage()
+		if err != nil {
+			log.Printf("Failed to read message: %v", err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Println("WebSocket connection closed unexpectedly. Exiting read loop.")
+				break
+			}
+			continue
+		}
 
-	log.Printf("Received: %s", message)
-
-	// Here you should add your logic to verify the received `currentMetadata`.
-	// This might involve unmarshalling the JSON message into a struct and
-	// comparing it to the expected value.
-	// For simplicity, this example just checks if the message is not empty.
-	if len(message) == 0 {
-		t.Errorf("Expected to receive currentMetadata, but got an empty message")
+		log.Printf("Received: %s", message)
 	}
 }

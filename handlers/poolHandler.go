@@ -20,6 +20,10 @@ func HandlePool(ctx context.Context, pool *models.Pool) {
 		select {
 		case <-ctx.Done():
 			log.Println("Pool handling cancelled")
+			for _, client := range pool.Clients {
+				client.Conn.Close()
+				delete(pool.Clients, client.ID)
+			}
 			return
 		case client := <-pool.Register:
 			pool.Clients[client.ID] = client

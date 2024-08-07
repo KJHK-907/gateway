@@ -9,8 +9,9 @@ type Client struct {
 }
 
 type Pool struct {
-	Register   chan *Client
-	Unregister chan *Client
-	Clients    map[string]*Client
-	Broadcast  chan Trackinfo
+	Register        chan *Client
+	Unregister      chan *Client
+	Clients         map[string]*Client
+	Broadcast       chan Trackinfo
+	RecentTrackInfo *Trackinfo
 }

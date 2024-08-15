@@ -33,14 +33,13 @@ Program scheduling
     - history JSON current sem JSON or each sem JSON
     - route to fetch programs for the semester
 
-- Notes:
+### Notes:
     -(TODO) If my websocket server would handle 10,000 clients then how do I decide what buffer size should the channels in the Pool struct be?
     -(TODO) load testing with 10,000 clients
-    -(TODO) clear old entries in the broadcast buffer when the buffer is full
     -(TODO) Check if it is a Link or a Song
-    -(TODO) How do I send out metadata to the client when they first connect?
-    -(TODO) Test client connection by creating a client script
     
+    -(DONE) Test client connection by creating a client script
+    -(DONE) How do I send out metadata to the client when they first connect?
     -(DONE) Should the websocket server be a goroutine or a main routine
     -(DONE) Check for duplicate entries in the recentTrackInfo map before sending out metadata in the broadcast buffer - time period is 10 minutes
     -(DONE) clear old entries in the recentTrackInfo map when the map is full 

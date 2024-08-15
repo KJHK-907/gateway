@@ -41,7 +41,21 @@ func main() {
 		handlers.HandleWebSocket(pool, w, r)
 	})
 
-	server := &http.Server{
+	apiGateway := &http.Server{
+		Addr:    ":8081",
+		Handler: http.HandlerFunc(handlers.HandleAPI),
+	}
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		log.Println("API Gateway started on port 8081")
+		if err := apiGateway.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("API Gateway server failed: %v", err)
+		}
+	}()
+
+	wsServer := &http.Server{
 		Addr:    ":8080",
 		Handler: nil,
 	}
@@ -49,11 +63,11 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
+		if err := wsServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("WebSocket server failed: %v", err)
 		}
 	}()
-	log.Println("Server started on port 8080")
+	log.Println("WebSocket Server started on port 8080")
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -68,8 +82,12 @@ func main() {
 	ctxShutDown, cancelShutDown := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelShutDown()
 
-	if err := server.Shutdown(ctxShutDown); err != nil {
-		log.Fatalf("Server Shutdown Failed:%+v", err)
+	if err := wsServer.Shutdown(ctxShutDown); err != nil {
+		log.Fatalf("WebSocket Server Shutdown Failed:%+v", err)
+	}
+
+	if err := apiGateway.Shutdown(ctxShutDown); err != nil {
+		log.Fatalf("API Gateway Server Shutdown Failed:%+v", err)
 	}
 
 	// Wait for all goroutines to finish

@@ -11,18 +11,27 @@ type contextListener struct {
 }
 
 func (l *contextListener) Accept() (net.Conn, error) {
-	for {
-		conn, err := l.Listener.Accept()
-		select {
-		case <-l.ctx.Done():
-			return nil, l.ctx.Err()
-		default:
-			if err != nil {
-				return nil, err
-			}
-			return conn, nil
-		}
+	type connError struct {
+		conn net.Conn
+		err  error
 	}
+
+	ch := make(chan connError, 1)
+	go func() {
+		conn, err := l.Listener.Accept()
+		ch <- connError{conn, err}
+	}()
+
+	select {
+	case <-l.ctx.Done():
+		return nil, l.ctx.Err()
+	case ce := <-ch:
+		return ce.conn, ce.err
+	}
+}
+
+func (l *contextListener) Close() error {
+	return l.Listener.Close()
 }
 
 func newContextListener(ctx context.Context, listener net.Listener) net.Listener {

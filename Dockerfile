@@ -8,5 +8,5 @@ RUN go build -o /app/gateway
 FROM alpine:3.17
 WORKDIR /app
 COPY --from=builder /app/gateway /app/gateway
-EXPOSE 8081
+EXPOSE 1234
 ENTRYPOINT [ "/app/gateway" ]

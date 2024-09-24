@@ -6,7 +6,7 @@ services:
     command: ["/app/gateway"]
   
   nginx:
-    image: nginx:latest
+    image: nginx:1.27
     ports:
       - "80:80"
     volumes:

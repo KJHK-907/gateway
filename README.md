@@ -1,44 +1,89 @@
-- TCP Server listens to metadata sent out from Zetta RCS
-    - Supported metadata:
-        - New Media Playing
+# Kjhk 90.7 FM API Gateway
 
-- TCP Server sends out metadata to all connected clients via WebSocket
+This project implements an API gateway and a WebSocket server that listens for metadata from a TCP server and broadcasts it to connected clients. The primary use case is to provide real-time updates to clients using the KJHK App on Android/iOS about new media playing on a Zetta RCS system.
 
-- Connection:
-    - Client (App) connects to WebSocket Server and sends message to subscribe to metadata via Opcodes
-    - WebSocket Server sends back message to confirm subscription and sends out metadata including heartbeat interval
-    - Client (App) receives metadata from WebSocket Server
-    - Client (App) sends heartbeat to WebSocket Server to keep connection alive
-    - WebSocket Server sends heartbeat opcode to client occasionally to keep connection alive
-    - Client (App) disconnects from WebSocket Server
+## Features
+- **API Gateway**: Connects client to the appropriate service (room for future services such as DJ Scheduling)
+- **TCP Server**: Listens for metadata sent from Zetta RCS.
+  - Supported metadata:
+    - New Media Playing
+- **WebSocket Server**: Sends metadata to all connected clients.
+    - Example Response: 
+    ```json
+    {
+        "track": "I Know It's Over",
+        "album": "The Queen Is Dead",
+        "artist": "The Smiths",
+        "length": 347893.3,
+        "timestampUTC": "2024-09-24T00:32:22Z",
+        "timestampCST": "2024-09-23T19:32:22Z"
+    }
+    ```
 
-- Opcodes:
-    - Heartbeat
-    - HeartbeatAck
+## Connection Workflow
 
-=====
+1. **Client Connection**: 
+   - The client (e.g., an app) connects to the Nginx server on port 80.
+   - The client mentions the target endpoint (metadata) in the request.
+2. **Nginx Reverse Proxy**:
+   - Nginx forwards the WebSocket connection to the API gateway on port 8081.
+3. **Subscription Confirmation**:
+   - The API gateway then routes the connection to the particular service requested by the client (metadata).
+   - The WebSocket server (running on port 8080) sends metadata once a successful connection is established.
+   - The server also sends out the most recent metadata to the client once they connect.
+4. **Metadata Reception**:
+   - The client receives metadata from the WebSocket server.
+5. **Heartbeat Mechanism**:
+   - The client sends a heartbeat to the Nginx server to keep the connection alive.
+6. **Client Disconnection**:
+   - The client disconnects from the WebSocket server.
+7. **Server Disconnection**:
+   - Server has graceful shutdown mechanism to ensure it disconnects all clients and performs necessary cleanups.
 
-Program scheduling 
-- history of programs (changes every semester) - update json every semester
-    - Name of program
-    - DJ
-    - description
-    - time
-    - day
-- history JSON current sem JSON or each sem JSON
-- route to fetch programs for the semester
+## Getting Started
 
-### Notes:
-- (TODO) If my websocket server would handle 10,000 clients then how do I decide what buffer size should the channels in the Pool struct be?
-- (TODO) load testing with 10,000 clients
-- (TODO) Check if it is a Link or a Song
+### Prerequisites
 
-- (DONE) Test client connection by creating a client script
-- (DONE) How do I send out metadata to the client when they first connect?
-- (DONE) Should the websocket server be a goroutine or a main routine
-- (DONE) Check for duplicate entries in the recentTrackInfo map before sending out metadata in the broadcast buffer - time period is 10 minutes
-- (DONE) clear old entries in the recentTrackInfo map when the map is full 
-- (DONE) If Zetta did not send anything in the last 10 minutes then attempt reconnection
-- (DONE) gracefully shutdown the websocket server in case of interrupt signal timeout and context
+- Docker
+- Docker Compose
 
-- (Note) Use caffeinate to prevent the system from going to sleep causing connection issues
+### Installation
+
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/KJHK-907/gateway.git
+    ```
+2. Running the Services:
+    ```sh
+    docker compose up --build
+    ```
+3. Client connection example (Node.js)
+    ```javascript
+    const WebSocket = require('ws');
+
+    const targetEndpoint = "metadata";
+    const ws = new WebSocket(`ws://localhost/api/?target=${targetEndpoint}`);
+
+    ws.on('open', function open() {
+    console.log('Connected to the server');
+    setInterval(() => {
+        ws.ping();
+    }, 30000);
+    });
+
+    ws.on('message', function incoming(data) {
+    console.log('Received from server:', data);
+    });
+
+    ws.on('error', function error(err) {
+    console.error('WebSocket error:', err);
+    });
+
+    ws.on('close', function close() {
+    console.log('Disconnected from the server');
+    });
+    ```
+
+### License
+
+This project is licensed under the MIT License.
